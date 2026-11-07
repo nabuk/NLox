@@ -1,4 +1,4 @@
-using NLox.Domain.Contracts;
+using NLox.Domain;
 
 namespace NLox.Interpreter;
 

@@ -1,4 +1,4 @@
-namespace NLox.Domain.Contracts;
+namespace NLox.Domain;
 
 public interface IErrorReporter
 {

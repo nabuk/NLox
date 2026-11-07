@@ -1,5 +1,3 @@
-using NLox.Domain.Contracts;
-
 namespace NLox.Domain;
 
 public class Scanner(string source, IErrorReporter errorReporter)

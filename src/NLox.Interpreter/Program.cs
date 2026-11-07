@@ -1,6 +1,5 @@
 ﻿using System;
 using NLox.Domain;
-using NLox.Domain.Contracts;
 
 namespace NLox.Interpreter;
 
