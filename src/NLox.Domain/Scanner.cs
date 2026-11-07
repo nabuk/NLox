@@ -8,6 +8,26 @@ public class Scanner(string source, IErrorReporter errorReporter)
     private int start = 0;
     private int current = 0;
     private int line = 0;
+
+    private readonly Dictionary<string, TokenType> keywords = new()
+    {
+        { "and", TokenType.And },
+        { "class", TokenType.Class },
+        { "else", TokenType.Else },
+        { "false", TokenType.False },
+        { "for", TokenType.For },
+        { "fun", TokenType.Fun },
+        { "if", TokenType.If },
+        { "nil", TokenType.Nil },
+        { "or", TokenType.Or },
+        { "print", TokenType.Print },
+        { "return", TokenType.Return },
+        { "super", TokenType.Super },
+        { "this", TokenType.This },
+        { "true", TokenType.True },
+        { "var", TokenType.Var },
+        { "while", TokenType.While }
+    };
     
     public List<Token> ScanTokens()
     {
@@ -75,9 +95,25 @@ public class Scanner(string source, IErrorReporter errorReporter)
             case '\n':
                 line++;
                 break;
+            
+            case '"':
+                AddString();
+                break;
                     
             default:
-                errorReporter.Error(line, "Unexpected character.");
+                if (IsDigit(c))
+                {
+                    AddNumber();
+                }
+                else if (IsAlpha(c))
+                {
+                    AddIdentifier();
+                }
+                else
+                {
+                    errorReporter.Error(line, "Unexpected character.");
+                }
+                
                 break;
         }
     }
@@ -88,6 +124,14 @@ public class Scanner(string source, IErrorReporter errorReporter)
             return '\0';
         
         return source[current];
+    }
+    
+    private char PeekNext()
+    {
+        if (current + 1 >= source.Length)
+            return '\0';
+        
+        return source[current + 1];
     }
 
     private char Advance()
@@ -105,6 +149,76 @@ public class Scanner(string source, IErrorReporter errorReporter)
         
         current++;
         return true;
+    }
+
+    private bool IsDigit(char c)
+    {
+        return  c is >= '0' and <= '9';
+    }
+
+    private bool IsAlpha(char c)
+    {
+        return c
+            is >= 'a' and <= 'z'
+            or >= 'A' and <= 'Z'
+            or '_';
+    }
+
+    private bool IsAlphaNumeric(char c)
+    {
+        return IsAlpha(c) ||  IsDigit(c);
+    }
+
+    private void AddString()
+    {
+        while (Peek() != '"' && !IsAtEnd())
+        {
+            if (Peek() == '\n')
+                line++;
+            
+            Advance();
+        }
+
+        if (IsAtEnd())
+        {
+            errorReporter.Error(line, "Unterminated string.");
+            return;
+        }
+
+        // The closing double quote.
+        Advance();
+        
+        // Trim the surrounding quotes.
+        var value = source.Substring(start + 1, current - start - 1);
+        AddToken(TokenType.String, value);
+    }
+
+    private void AddNumber()
+    {
+        while (IsDigit(Peek()))
+            Advance();
+
+        if (Peek() == '.' && IsDigit(PeekNext()))
+        {
+            Advance();
+            
+            while (IsDigit(Peek()))
+                Advance();
+        }
+
+        var strValue = source.Substring(start, current - start);
+        var value = double.Parse(strValue);
+        AddToken(TokenType.Number, value);
+    }
+
+    private void AddIdentifier()
+    {
+        while (IsAlphaNumeric(Peek()))
+            Advance();
+        
+        var text = source.Substring(start, current - start);
+        var type = keywords.GetValueOrDefault(text, TokenType.Identifier);
+        AddToken(type);
     }
 
     private void AddToken(TokenType type, object? literal = null)
