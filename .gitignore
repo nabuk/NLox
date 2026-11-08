@@ -60,3 +60,4 @@ nunit-*.xml
 
 # Rider
 .idea/
+.editorconfig
