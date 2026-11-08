@@ -11,14 +11,14 @@ public class RpnPrinter : Expr.IVisitor<string>
     }
     
     string Expr.IVisitor<string>.VisitBinaryExpr(Expr.Binary expr) =>
-        $"{Print(expr.Left)} {Print(expr.Right)} {expr.Operator.Lexeme}";
+        $"{expr.Left.Accept(this)} {expr.Right.Accept(this)} {expr.Operator.Lexeme}";
 
     string Expr.IVisitor<string>.VisitGroupingExpr(Expr.Grouping expr) =>
-        Print(expr.Expression);
+        expr.Expression.Accept(this);
 
     string Expr.IVisitor<string>.VisitLiteralExpr(Expr.Literal expr) =>
         expr.Value?.ToString() ?? "nil";
 
     string Expr.IVisitor<string>.VisitUnaryExpr(Expr.Unary expr) =>
-        $"{Print(expr.Right)} {expr.Operator.Lexeme}";
+        $"{expr.Right.Accept(this)} {expr.Operator.Lexeme}";
 }
