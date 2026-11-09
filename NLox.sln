@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLox.Interpreter", "src\NLox.Interpreter\NLox.Interpreter.csproj", "{C77B110D-AAD1-4884-BAE2-432CE588FF2F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLox.ConsoleInterpreter", "src\NLox.ConsoleInterpreter\NLox.ConsoleInterpreter.csproj", "{C77B110D-AAD1-4884-BAE2-432CE588FF2F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLox.Domain", "src\NLox.Domain\NLox.Domain.csproj", "{290879CC-53C8-495E-B8A5-35D13A71FE23}"
 EndProject

@@ -7,7 +7,7 @@ internal static class Program
     public static async Task<int> Main(string[] args)
     {
         var errorReporter = new StandardErrorReporter();
-        var interpreter = new Interpreter(errorReporter);
+        var consoleRunner = new ConsoleRunner(errorReporter);
         
         try
         {
@@ -18,11 +18,11 @@ internal static class Program
             }
             else if (args.Length == 1)
             {
-                await interpreter.RunFile(args[0]);
+                await consoleRunner.RunFile(args[0]);
             }
             else
             {
-                interpreter.RunPrompt();
+                consoleRunner.RunPrompt();
             }
         }
         catch (LoxException ex)

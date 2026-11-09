@@ -2,7 +2,7 @@ using NLox.Domain;
 
 namespace NLox.Interpreter;
 
-public sealed class Interpreter(IErrorReporter errorReporter)
+public sealed class ConsoleRunner(IErrorReporter errorReporter)
 {
     public async Task RunFile(string path)
     {
