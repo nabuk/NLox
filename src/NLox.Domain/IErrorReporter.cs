@@ -7,4 +7,6 @@ public interface IErrorReporter
     void ResetHadError();
     
     void Error(int line, string message);
+    
+    void Error(Token token, string message);
 }

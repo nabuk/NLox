@@ -1,5 +1,4 @@
-﻿using System;
-using NLox.Domain;
+﻿using NLox.Domain;
 
 namespace NLox.Interpreter;
 
@@ -32,20 +31,5 @@ internal static class Program
         }
 
         return 0;
-    }
-
-    private static void DemoPrintExpr()
-    {
-        Expr expression = new Expr.Binary(
-            new Expr.Binary(
-                new Expr.Literal(123),
-                new Token(TokenType.Minus, "-", null, 1),
-                new Expr.Literal(23)),
-            new Token(TokenType.Star, "*", null, 1),
-            new Expr.Grouping(
-                new Expr.Literal(45.67)));
-
-        Console.WriteLine("AST: " + new AstPrinter().Print(expression));
-        Console.WriteLine("RPN: " + new RpnPrinter().Print(expression));
     }
 }

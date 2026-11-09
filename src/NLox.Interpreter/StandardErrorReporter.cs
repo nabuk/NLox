@@ -15,6 +15,14 @@ public sealed class StandardErrorReporter : IErrorReporter
     {
         Report(line, "",  message);
     }
+    
+    public void Error(Token token, string message)
+    {
+        Report(
+            token.Line,
+            token.Type == TokenType.Eof ? " at end" : $" at '{token.Lexeme}'",
+            message);
+    }
 
     private void Report(int line, string where, string message)
     {

@@ -31,10 +31,13 @@ public sealed class Interpreter(IErrorReporter errorReporter)
     {
         var scanner = new Scanner(source, errorReporter);
         var tokens = scanner.ScanTokens();
+        var parser = new Parser(tokens, errorReporter);
+        var expression = parser.Parse();
+        
+        if (errorReporter.HadError)
+            return;
 
-        foreach (var token in tokens)
-        {
-            Console.WriteLine(token);
-        }
+        var printResult = new AstPrinter().Print(expression!);
+        Console.WriteLine(printResult);
     }
 }

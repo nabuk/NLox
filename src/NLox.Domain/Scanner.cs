@@ -187,7 +187,7 @@ public class Scanner(string source, IErrorReporter errorReporter)
         Advance();
         
         // Trim the surrounding quotes.
-        var value = source.Substring(start + 1, current - start - 1);
+        var value = source.Substring(start + 1, current - start - 2);
         AddToken(TokenType.String, value);
     }
 

@@ -1,11 +1,6 @@
 namespace NLox.Domain;
 
-public class LoxException : Exception
+public class LoxException(int exitCode) : Exception
 {
-    public LoxException(int exitCode)
-    {
-        ExitCode = exitCode;
-    }
-    
-    public int ExitCode { get; }
+    public int ExitCode { get; } = exitCode;
 }
