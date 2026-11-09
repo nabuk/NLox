@@ -1,6 +1,6 @@
 using NLox.Domain;
 
-namespace NLox.Interpreter;
+namespace NLox.ConsoleInterpreter;
 
 public sealed class ConsoleRunner(IErrorReporter errorReporter)
 {
@@ -10,7 +10,10 @@ public sealed class ConsoleRunner(IErrorReporter errorReporter)
         Run(content);
 
         if (errorReporter.HadError)
-            throw new LoxException(65);
+            throw new LoxError(65);
+        
+        if (errorReporter.HadRuntimeError)
+            throw new LoxError(70);
     }
 
     public void RunPrompt()
@@ -23,7 +26,9 @@ public sealed class ConsoleRunner(IErrorReporter errorReporter)
                 break;
 
             Run(line);
+            
             errorReporter.ResetHadError();
+            errorReporter.ResetHadRuntimeError();
         }
     }
 
@@ -32,12 +37,17 @@ public sealed class ConsoleRunner(IErrorReporter errorReporter)
         var scanner = new Scanner(source, errorReporter);
         var tokens = scanner.ScanTokens();
         var parser = new Parser(tokens, errorReporter);
-        var expression = parser.Parse();
         
         if (errorReporter.HadError)
             return;
+        
+        var expression = parser.Parse();
+        if (errorReporter.HadError || expression == null)
+            return;
+        
+        var interpreter = new Interpreter(errorReporter);
+        var result = interpreter.Interpret(expression);
 
-        var printResult = new AstPrinter().Print(expression!);
-        Console.WriteLine(printResult);
+        Console.WriteLine(result);
     }
 }

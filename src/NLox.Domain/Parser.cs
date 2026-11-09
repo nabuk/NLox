@@ -10,7 +10,7 @@ public class Parser(List<Token> tokens, IErrorReporter errorReporter)
         {
             return Expression();
         }
-        catch (ParseException)
+        catch (ParseError)
         {
             return null;
         }
@@ -84,9 +84,9 @@ public class Parser(List<Token> tokens, IErrorReporter errorReporter)
         throw Error(Peek(), message);
     }
     
-    private ParseException Error(Token token, string message) {
+    private ParseError Error(Token token, string message) {
         errorReporter.Error(token, message);
-        return new ParseException();
+        return new ParseError();
     }
 
     private void Synchronize()

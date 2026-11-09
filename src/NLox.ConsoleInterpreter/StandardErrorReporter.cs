@@ -1,14 +1,21 @@
 using NLox.Domain;
 
-namespace NLox.Interpreter;
+namespace NLox.ConsoleInterpreter;
 
 public sealed class StandardErrorReporter : IErrorReporter
 {
     public bool HadError { get; private set; }
+    
+    public bool HadRuntimeError { get; private set; }
 
     public void ResetHadError()
     {
         HadError = false;
+    }
+    
+    public void ResetHadRuntimeError()
+    {
+        HadRuntimeError = false;
     }
 
     public void Error(int line, string message)
@@ -22,6 +29,13 @@ public sealed class StandardErrorReporter : IErrorReporter
             token.Line,
             token.Type == TokenType.Eof ? " at end" : $" at '{token.Lexeme}'",
             message);
+    }
+
+    public void RuntimeError(RuntimeError error)
+    {
+        Console.Error.WriteLine("error.Message");
+        Console.Error.WriteLine($"[line {error.Token.Line}]");
+        HadRuntimeError = true;
     }
 
     private void Report(int line, string where, string message)

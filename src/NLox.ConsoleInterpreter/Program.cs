@@ -1,6 +1,6 @@
 ﻿using NLox.Domain;
 
-namespace NLox.Interpreter;
+namespace NLox.ConsoleInterpreter;
 
 internal static class Program
 {
@@ -14,7 +14,7 @@ internal static class Program
             if (args.Length > 1)
             {
                 Console.WriteLine("Usage: nlox [script]");
-                throw new LoxException(64);
+                throw new LoxError(64);
             }
             else if (args.Length == 1)
             {
@@ -25,7 +25,7 @@ internal static class Program
                 consoleRunner.RunPrompt();
             }
         }
-        catch (LoxException ex)
+        catch (LoxError ex)
         {
             return ex.ExitCode;
         }
