@@ -4,16 +4,36 @@ public class Parser(List<Token> tokens, IErrorReporter errorReporter)
 {
     private int current = 0;
 
-    public Expr? Parse()
+    public IReadOnlyList<Stmt> Parse()
     {
-        try
-        {
-            return Expression();
-        }
-        catch (ParseError)
-        {
-            return null;
-        }
+        var result = new List<Stmt>();
+        
+        while (!IsAtEnd())
+            result.Add(Statement());
+        
+        return result;
+    }
+
+    private Stmt Statement()
+    {
+        if (Match(TokenType.Print))
+            return PrintStatement();
+
+        return ExpressionStatement();
+    }
+    
+    private Stmt PrintStatement()
+    {
+        var value = Expression();
+        Consume(TokenType.Semicolon, "Expect ';' after value.");
+        return new Stmt.Print(value);
+    }
+    
+    private Stmt ExpressionStatement()
+    {
+        var expr = Expression();
+        Consume(TokenType.Semicolon, "Expect ';' after expression.");
+        return new Stmt.Expression(expr);
     }
 
     private Expr Expression() => Equality();

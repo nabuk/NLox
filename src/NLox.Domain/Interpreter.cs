@@ -1,19 +1,31 @@
 namespace NLox.Domain;
 
-public class Interpreter(IErrorReporter errorReporter) : Expr.IVisitor<object?>
+public class Interpreter(IConsole console, IErrorReporter errorReporter) : Stmt.IVisitor<object?>, Expr.IVisitor<object?>
 {
-    public string? Interpret(Expr expression)
+    public void Interpret(IEnumerable<Stmt> statements)
     {
         try
         {
-            var value = Evaluate(expression);
-            return Stringify(value);
+            foreach (var stmt in statements)
+                Execute(stmt);
         }
         catch (RuntimeError ex)
         {
             errorReporter.RuntimeError(ex);
         }
+    }
+    
+    object? Stmt.IVisitor<object?>.VisitExpressionStmt(Stmt.Expression stmt)
+    {
+        Evaluate(stmt.InnerExpression);
+        return null;
+    }
 
+    object? Stmt.IVisitor<object?>.VisitPrintStmt(Stmt.Print stmt)
+    {
+        var value = Evaluate((stmt.InnerExpression));
+        var str = Stringify(value);
+        console.PrintLine(str);
         return null;
     }
     
@@ -83,6 +95,9 @@ public class Interpreter(IErrorReporter errorReporter) : Expr.IVisitor<object?>
                 throw new InvalidOperationException($"Unexpected operator {expr.Operator.Type}");
         }
     }
+
+    private void Execute(Stmt stmt) =>
+        stmt.Accept(this);
 
     private void CheckNumberOperand(Token @operator, object? operand)
     {

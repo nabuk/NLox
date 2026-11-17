@@ -2,7 +2,7 @@ using NLox.Domain;
 
 namespace NLox.ConsoleInterpreter;
 
-public sealed class ConsoleRunner(IErrorReporter errorReporter)
+public sealed class ConsoleRunner(IConsole console, IErrorReporter errorReporter)
 {
     public async Task RunFile(string path)
     {
@@ -41,13 +41,11 @@ public sealed class ConsoleRunner(IErrorReporter errorReporter)
         if (errorReporter.HadError)
             return;
         
-        var expression = parser.Parse();
-        if (errorReporter.HadError || expression == null)
+        var statements = parser.Parse();
+        if (errorReporter.HadError)
             return;
         
-        var interpreter = new Interpreter(errorReporter);
-        var result = interpreter.Interpret(expression);
-
-        Console.WriteLine(result);
+        var interpreter = new Interpreter(console, errorReporter);
+        interpreter.Interpret(statements);
     }
 }

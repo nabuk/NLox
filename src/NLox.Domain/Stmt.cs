@@ -1,0 +1,32 @@
+using System.Diagnostics;
+
+namespace NLox.Domain;
+
+public abstract class Stmt
+{
+    public interface IVisitor<out T>
+    {
+        T VisitExpressionStmt(Expression stmt);
+        T VisitPrintStmt(Print stmt);
+    }
+    
+    public abstract T Accept<T>(IVisitor<T> visitor);
+
+    public class Expression(Expr expression) : Stmt
+    {
+        public Expr InnerExpression => expression;
+        
+        [DebuggerStepThrough]
+        public override T Accept<T>(IVisitor<T> visitor) =>
+            visitor.VisitExpressionStmt(this);
+    }
+
+    public class Print(Expr expression) : Stmt
+    {
+        public Expr InnerExpression => expression;
+        
+        [DebuggerStepThrough]
+        public override T Accept<T>(IVisitor<T> visitor) =>
+            visitor.VisitPrintStmt(this);
+    }
+}

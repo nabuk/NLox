@@ -6,8 +6,9 @@ internal static class Program
 {
     public static async Task<int> Main(string[] args)
     {
+        var consoleService = new ConsoleService();
         var errorReporter = new StandardErrorReporter();
-        var consoleRunner = new ConsoleRunner(errorReporter);
+        var consoleRunner = new ConsoleRunner(consoleService, errorReporter);
         
         try
         {
