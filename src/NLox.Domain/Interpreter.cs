@@ -2,6 +2,8 @@ namespace NLox.Domain;
 
 public class Interpreter(IConsole console, IErrorReporter errorReporter) : Stmt.IVisitor<object?>, Expr.IVisitor<object?>
 {
+    private readonly EnvironmentVars environment =  new EnvironmentVars();
+
     public void Interpret(IEnumerable<Stmt> statements)
     {
         try
@@ -28,7 +30,17 @@ public class Interpreter(IConsole console, IErrorReporter errorReporter) : Stmt.
         console.PrintLine(str);
         return null;
     }
-    
+
+    object? Stmt.IVisitor<object?>.VisitVarStmt(Stmt.Var stmt)
+    {
+        object? value = null;
+        if (stmt.Initializer != null)
+            value = Evaluate(stmt.Initializer);
+        
+        environment.Define(stmt.Name.Lexeme, value);
+        return null;
+    }
+
     object? Expr.IVisitor<object?>.VisitBinaryExpr(Expr.Binary expr)
     {
         var left = Evaluate(expr.Left);
@@ -95,6 +107,9 @@ public class Interpreter(IConsole console, IErrorReporter errorReporter) : Stmt.
                 throw new InvalidOperationException($"Unexpected operator {expr.Operator.Type}");
         }
     }
+
+    object? Expr.IVisitor<object?>.VisitVariableExpr(Expr.Variable expr) =>
+        environment.Get(expr.Name);
 
     private void Execute(Stmt stmt) =>
         stmt.Accept(this);

@@ -33,7 +33,7 @@ public sealed class StandardErrorReporter : IErrorReporter
 
     public void RuntimeError(RuntimeError error)
     {
-        Console.Error.WriteLine("error.Message");
+        Console.Error.WriteLine($"{error.Message}");
         Console.Error.WriteLine($"[line {error.Token.Line}]");
         HadRuntimeError = true;
     }

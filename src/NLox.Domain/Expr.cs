@@ -10,6 +10,7 @@ public abstract class Expr
         T VisitGroupingExpr(Grouping expr);
         T VisitLiteralExpr(Literal expr);
         T VisitUnaryExpr(Unary expr);
+        T VisitVariableExpr(Variable expr);
     }
 
     public abstract T Accept<T>(IVisitor<T> visitor);
@@ -51,5 +52,14 @@ public abstract class Expr
         [DebuggerStepThrough]
         public override T Accept<T>(IVisitor<T> visitor) =>
             visitor.VisitUnaryExpr(this);
+    }
+
+    public class Variable(Token name) : Expr
+    {
+        public Token Name => name;
+        
+        [DebuggerStepThrough]
+        public override T Accept<T>(IVisitor<T> visitor) =>
+            visitor.VisitVariableExpr(this);
     }
 }

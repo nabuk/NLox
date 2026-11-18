@@ -21,6 +21,9 @@ public class AstPrinter : Expr.IVisitor<string>
     string Expr.IVisitor<string>.VisitUnaryExpr(Expr.Unary expr) =>
         Parenthesize(expr.Operator.Lexeme,  expr.Right);
 
+    string Expr.IVisitor<string>.VisitVariableExpr(Expr.Variable expr) =>
+        $"get({expr.Name})";
+
     private string Parenthesize(string name, params Expr[] exprs)
     {
         var value = string.Join("", exprs.Select(x => $" {x.Accept(this)}"));

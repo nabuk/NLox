@@ -4,6 +4,8 @@ namespace NLox.ConsoleInterpreter;
 
 public sealed class ConsoleRunner(IConsole console, IErrorReporter errorReporter)
 {
+    private readonly Interpreter interpreter = new(console, errorReporter);
+
     public async Task RunFile(string path)
     {
         var content = await File.ReadAllTextAsync(path);
@@ -45,7 +47,6 @@ public sealed class ConsoleRunner(IConsole console, IErrorReporter errorReporter
         if (errorReporter.HadError)
             return;
         
-        var interpreter = new Interpreter(console, errorReporter);
         interpreter.Interpret(statements);
     }
 }

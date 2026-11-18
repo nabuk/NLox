@@ -21,4 +21,7 @@ public class RpnPrinter : Expr.IVisitor<string>
 
     string Expr.IVisitor<string>.VisitUnaryExpr(Expr.Unary expr) =>
         $"{expr.Right.Accept(this)} {expr.Operator.Lexeme}";
+    
+    string Expr.IVisitor<string>.VisitVariableExpr(Expr.Variable expr) =>
+        $"{expr.Name} get";
 }
