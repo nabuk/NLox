@@ -12,6 +12,7 @@ public abstract class Expr
         T VisitUnaryExpr(Unary expr);
         T VisitVariableExpr(Variable expr);
         T VisitAssignExpr(Assign expr);
+        T VisitLogicalExpr(Logical expr);
     }
 
     public abstract T Accept<T>(IVisitor<T> visitor);
@@ -72,5 +73,16 @@ public abstract class Expr
         [DebuggerStepThrough]
         public override T Accept<T>(IVisitor<T> visitor) =>
             visitor.VisitAssignExpr(this);
+    }
+
+    public class Logical(Expr left, Token @operator, Expr right) : Expr
+    {
+        public Expr Left => left;
+        public Token Operator => @operator;
+        public Expr Right => right;
+
+        [DebuggerStepThrough]
+        public override T Accept<T>(IVisitor<T> visitor) =>
+            visitor.VisitLogicalExpr(this);
     }
 }

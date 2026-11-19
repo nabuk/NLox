@@ -23,6 +23,16 @@ public class Interpreter(IConsole console, IErrorReporter errorReporter) : Stmt.
         return null;
     }
 
+    object? Stmt.IVisitor<object?>.VisitIfStmt(Stmt.If stmt)
+    {
+        if (IsTruthy(Evaluate(stmt.Condition)))
+            Execute(stmt.ThenBranch);
+        else if (stmt.ElseBranch != null)
+            Execute(stmt.ElseBranch);
+
+        return null;
+    }
+
     object? Stmt.IVisitor<object?>.VisitPrintStmt(Stmt.Print stmt)
     {
         var value = Evaluate((stmt.InnerExpression));
@@ -38,6 +48,14 @@ public class Interpreter(IConsole console, IErrorReporter errorReporter) : Stmt.
             value = Evaluate(stmt.Initializer);
         
         environment.Define(stmt.Name.Lexeme, value);
+        return null;
+    }
+
+    object? Stmt.IVisitor<object?>.VisitWhileStmt(Stmt.While stmt)
+    {
+        while (IsTruthy(Evaluate(stmt.Condition)))
+            Execute(stmt.Body);
+
         return null;
     }
 
@@ -90,6 +108,23 @@ public class Interpreter(IConsole console, IErrorReporter errorReporter) : Stmt.
         }
         
         throw new InvalidOperationException($"Unexpected operator {expr.Operator.Type}");
+    }
+
+    object? Expr.IVisitor<object?>.VisitLogicalExpr(Expr.Logical expr)
+    {
+        var left = Evaluate(expr.Left);
+        if (expr.Operator.Type == TokenType.Or)
+        {
+            if (IsTruthy(left))
+                return left;
+        }
+        else
+        {
+            if (!IsTruthy(left))
+                return left;
+        }
+
+        return Evaluate(expr.Right);
     }
 
     object? Expr.IVisitor<object?>.VisitGroupingExpr(Expr.Grouping expr) =>

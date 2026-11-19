@@ -27,6 +27,9 @@ public class AstPrinter : Expr.IVisitor<string>
     string Expr.IVisitor<string>.VisitAssignExpr(Expr.Assign expr) =>
         Parenthesize("=", expr.Name.Lexeme, expr);
 
+    string Expr.IVisitor<string>.VisitLogicalExpr(Expr.Logical expr) =>
+        Parenthesize(expr.Operator.Lexeme,  expr.Left, expr.Right);
+
     private string Parenthesize(string name, params object?[] args)
     {
         var value = string.Join("", args.Select(x => $" {Render(this)}"));

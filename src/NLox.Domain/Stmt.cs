@@ -7,6 +7,8 @@ public abstract class Stmt
     public interface IVisitor<out T>
     {
         T VisitExpressionStmt(Expression stmt);
+        T VisitIfStmt(If stmt);
+        T VisitWhileStmt(While stmt);
         T VisitPrintStmt(Print stmt);
         T VisitVarStmt(Var stmt);
         T VisitBlockStmt(Block stmt);
@@ -49,5 +51,26 @@ public abstract class Stmt
         [DebuggerStepThrough]
         public override T Accept<T>(IVisitor<T> visitor) =>
             visitor.VisitBlockStmt(this);
+    }
+
+    public class If(Expr condition, Stmt thenBranch, Stmt? elseBranch) : Stmt
+    {
+        public Expr Condition => condition;
+        public Stmt ThenBranch => thenBranch;
+        public Stmt? ElseBranch => elseBranch;
+        
+        [DebuggerStepThrough]
+        public override T Accept<T>(IVisitor<T> visitor) =>
+            visitor.VisitIfStmt(this);
+    }
+    
+    public class While(Expr condition, Stmt body) : Stmt
+    {
+        public Expr Condition => condition;
+        public Stmt Body => body;
+        
+        [DebuggerStepThrough]
+        public override T Accept<T>(IVisitor<T> visitor) =>
+            visitor.VisitWhileStmt(this);
     }
 }
