@@ -2,7 +2,7 @@ namespace NLox.Domain;
 
 public class Interpreter(IConsole console, IErrorReporter errorReporter) : Stmt.IVisitor<object?>, Expr.IVisitor<object?>
 {
-    private readonly EnvironmentVars environment =  new EnvironmentVars();
+    private EnvironmentScope environment =  new EnvironmentScope();
 
     public void Interpret(IEnumerable<Stmt> statements)
     {
@@ -38,6 +38,12 @@ public class Interpreter(IConsole console, IErrorReporter errorReporter) : Stmt.
             value = Evaluate(stmt.Initializer);
         
         environment.Define(stmt.Name.Lexeme, value);
+        return null;
+    }
+
+    object? Stmt.IVisitor<object?>.VisitBlockStmt(Stmt.Block stmt)
+    {
+        ExecuteBlock(stmt.Statements, new EnvironmentScope(environment));
         return null;
     }
 
@@ -111,8 +117,31 @@ public class Interpreter(IConsole console, IErrorReporter errorReporter) : Stmt.
     object? Expr.IVisitor<object?>.VisitVariableExpr(Expr.Variable expr) =>
         environment.Get(expr.Name);
 
+    object? Expr.IVisitor<object?>.VisitAssignExpr(Expr.Assign expr)
+    {
+        var value = Evaluate(expr.Value);
+        environment.Assign(expr.Name, value);
+        return value;
+    }
+
     private void Execute(Stmt stmt) =>
         stmt.Accept(this);
+
+    private void ExecuteBlock(IEnumerable<Stmt?> statements, EnvironmentScope environment)
+    {
+        var previous = this.environment;
+        try
+        {
+            this.environment = environment;
+            foreach (var stmt in statements)
+                if (stmt != null)
+                    Execute(stmt);
+        }
+        finally
+        {
+            this.environment = previous;
+        }
+    }
 
     private void CheckNumberOperand(Token @operator, object? operand)
     {

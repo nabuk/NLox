@@ -23,5 +23,8 @@ public class RpnPrinter : Expr.IVisitor<string>
         $"{expr.Right.Accept(this)} {expr.Operator.Lexeme}";
     
     string Expr.IVisitor<string>.VisitVariableExpr(Expr.Variable expr) =>
-        $"{expr.Name} get";
+        $"{expr.Name}";
+    
+    string Expr.IVisitor<string>.VisitAssignExpr(Expr.Assign expr) =>
+        $"{expr.Value.Accept(this)} {expr.Name} =";
 }

@@ -22,11 +22,24 @@ public class AstPrinter : Expr.IVisitor<string>
         Parenthesize(expr.Operator.Lexeme,  expr.Right);
 
     string Expr.IVisitor<string>.VisitVariableExpr(Expr.Variable expr) =>
-        $"get({expr.Name})";
+        expr.Name.Lexeme;
+    
+    string Expr.IVisitor<string>.VisitAssignExpr(Expr.Assign expr) =>
+        Parenthesize("=", expr.Name.Lexeme, expr);
 
-    private string Parenthesize(string name, params Expr[] exprs)
+    private string Parenthesize(string name, params object?[] args)
     {
-        var value = string.Join("", exprs.Select(x => $" {x.Accept(this)}"));
+        var value = string.Join("", args.Select(x => $" {Render(this)}"));
         return $"({name}{value})";
+    }
+
+    private string Render(object? value)
+    {
+        return value switch
+        {
+            Expr x => x.Accept(this),
+            Token x => x.Lexeme,
+            _ => value?.ToString() ?? "nil"
+        };
     }
 }

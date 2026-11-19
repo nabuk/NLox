@@ -9,6 +9,7 @@ public abstract class Stmt
         T VisitExpressionStmt(Expression stmt);
         T VisitPrintStmt(Print stmt);
         T VisitVarStmt(Var stmt);
+        T VisitBlockStmt(Block stmt);
     }
     
     public abstract T Accept<T>(IVisitor<T> visitor);
@@ -39,5 +40,14 @@ public abstract class Stmt
         [DebuggerStepThrough]
         public override T Accept<T>(IVisitor<T> visitor) =>
             visitor.VisitVarStmt(this);
+    }
+
+    public class Block(List<Stmt?> statements) : Stmt
+    {
+        public List<Stmt?> Statements => statements;
+        
+        [DebuggerStepThrough]
+        public override T Accept<T>(IVisitor<T> visitor) =>
+            visitor.VisitBlockStmt(this);
     }
 }

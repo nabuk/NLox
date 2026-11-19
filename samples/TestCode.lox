@@ -1,0 +1,5 @@
+var a = 5;
+a = -1;
+var x = 23;
+var r = a * x * 4;
+print r;

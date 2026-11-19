@@ -11,6 +11,7 @@ public abstract class Expr
         T VisitLiteralExpr(Literal expr);
         T VisitUnaryExpr(Unary expr);
         T VisitVariableExpr(Variable expr);
+        T VisitAssignExpr(Assign expr);
     }
 
     public abstract T Accept<T>(IVisitor<T> visitor);
@@ -61,5 +62,15 @@ public abstract class Expr
         [DebuggerStepThrough]
         public override T Accept<T>(IVisitor<T> visitor) =>
             visitor.VisitVariableExpr(this);
+    }
+
+    public class Assign(Token name, Expr value) : Expr
+    {
+        public Token Name => name;
+        public Expr Value => value;
+
+        [DebuggerStepThrough]
+        public override T Accept<T>(IVisitor<T> visitor) =>
+            visitor.VisitAssignExpr(this);
     }
 }
