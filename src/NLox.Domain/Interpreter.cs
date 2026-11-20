@@ -1,8 +1,20 @@
 namespace NLox.Domain;
 
-public class Interpreter(IConsole console, IErrorReporter errorReporter) : Stmt.IVisitor<object?>, Expr.IVisitor<object?>
+public class Interpreter : Stmt.IVisitor<object?>, Expr.IVisitor<object?>
 {
-    private EnvironmentScope environment =  new EnvironmentScope();
+    private readonly IConsole console;
+    private readonly IErrorReporter errorReporter;
+    private readonly EnvironmentScope globals;
+    private EnvironmentScope environment;
+
+    public Interpreter(IConsole console, IErrorReporter errorReporter)
+    {
+        this.console = console;
+        this.errorReporter = errorReporter;
+        this.globals = new();
+        this.environment = globals;
+        DefineClock();
+    }
 
     public void Interpret(IEnumerable<Stmt> statements)
     {
@@ -110,6 +122,18 @@ public class Interpreter(IConsole console, IErrorReporter errorReporter) : Stmt.
         throw new InvalidOperationException($"Unexpected operator {expr.Operator.Type}");
     }
 
+    object? Expr.IVisitor<object?>.VisitCallExpr(Expr.Call expr)
+    {
+        var callee = Evaluate(expr.Callee) ?? throw new InvalidOperationException("Expected callee");
+        var arguments = expr.Arguments.Select(Evaluate).ToArray();
+        var function = callee as ILoxCallable
+                       ?? throw new RuntimeError(expr.Paren, "Can only call functions and classes.");
+        if (function.Arity != arguments.Length)
+            throw new RuntimeError(expr.Paren, $"Expected {function.Arity} arguments, but got {arguments.Length}.");
+        
+        return function.Call(this, arguments);
+    }
+
     object? Expr.IVisitor<object?>.VisitLogicalExpr(Expr.Logical expr)
     {
         var left = Evaluate(expr.Left);
@@ -215,5 +239,14 @@ public class Interpreter(IConsole console, IErrorReporter errorReporter) : Stmt.
             return "nil";
 
         return value.ToString()!;
+    }
+
+    private void DefineClock()
+    {
+        this.globals.Define(
+            "clock",
+            new NativeLoxCallable(
+                (_, _) => DateTimeOffset.Now.ToUnixTimeMilliseconds() / 1000.0,
+                0));
     }
 }

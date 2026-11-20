@@ -2,7 +2,7 @@ namespace NLox.Domain;
 
 public class Scanner(string source, IErrorReporter errorReporter)
 {
-    private readonly List<Token> tokens = new List<Token>();
+    private readonly List<Token> tokens = new();
     private int start = 0;
     private int current = 0;
     private int line = 0;
@@ -27,7 +27,7 @@ public class Scanner(string source, IErrorReporter errorReporter)
         { "while", TokenType.While }
     };
     
-    public List<Token> ScanTokens()
+    public IReadOnlyList<Token> ScanTokens()
     {
         while (!IsAtEnd())
         {

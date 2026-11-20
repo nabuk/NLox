@@ -44,9 +44,9 @@ public abstract class Stmt
             visitor.VisitVarStmt(this);
     }
 
-    public class Block(List<Stmt?> statements) : Stmt
+    public class Block(IReadOnlyList<Stmt?> statements) : Stmt
     {
-        public List<Stmt?> Statements => statements;
+        public IReadOnlyList<Stmt?> Statements => statements;
         
         [DebuggerStepThrough]
         public override T Accept<T>(IVisitor<T> visitor) =>

@@ -29,6 +29,9 @@ public class AstPrinter : Expr.IVisitor<string>
 
     string Expr.IVisitor<string>.VisitLogicalExpr(Expr.Logical expr) =>
         Parenthesize(expr.Operator.Lexeme,  expr.Left, expr.Right);
+    
+    string Expr.IVisitor<string>.VisitCallExpr(Expr.Call expr) =>
+        Parenthesize("call", [expr.Callee, ..expr.Arguments]);
 
     private string Parenthesize(string name, params object?[] args)
     {

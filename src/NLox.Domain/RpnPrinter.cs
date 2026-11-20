@@ -11,23 +11,39 @@ public class RpnPrinter : Expr.IVisitor<string>
     }
     
     string Expr.IVisitor<string>.VisitBinaryExpr(Expr.Binary expr) =>
-        $"{expr.Left.Accept(this)} {expr.Right.Accept(this)} {expr.Operator.Lexeme}";
+        Render(expr.Left, expr.Right, expr.Operator.Lexeme);
 
     string Expr.IVisitor<string>.VisitGroupingExpr(Expr.Grouping expr) =>
-        expr.Expression.Accept(this);
+        Render(expr.Expression);
 
     string Expr.IVisitor<string>.VisitLiteralExpr(Expr.Literal expr) =>
-        expr.Value?.ToString() ?? "nil";
+        Render(expr.Value);
 
     string Expr.IVisitor<string>.VisitUnaryExpr(Expr.Unary expr) =>
-        $"{expr.Right.Accept(this)} {expr.Operator.Lexeme}";
+        Render(expr.Right, expr.Operator.Lexeme);
     
     string Expr.IVisitor<string>.VisitVariableExpr(Expr.Variable expr) =>
-        $"{expr.Name}";
+        Render(expr.Name);
     
     string Expr.IVisitor<string>.VisitAssignExpr(Expr.Assign expr) =>
-        $"{expr.Value.Accept(this)} {expr.Name} =";
+        Render(expr.Value, expr.Name, "=");
 
     string Expr.IVisitor<string>.VisitLogicalExpr(Expr.Logical expr) =>
-        $"{expr.Left.Accept(this)} {expr.Right.Accept(this)} {expr.Operator.Lexeme}";
+        Render(expr.Left, expr.Right, expr.Operator.Lexeme);
+
+    string Expr.IVisitor<string>.VisitCallExpr(Expr.Call expr) =>
+        Render([.. expr.Arguments.AsEnumerable().Reverse(), expr.Callee, "call"]);
+
+    private string Render(params object?[] args) =>
+        string.Join(" ", args.Select(RenderValue));
+    
+    private string RenderValue(object? value)
+    {
+        return value switch
+        {
+            Expr x => x.Accept(this),
+            Token x => x.Lexeme,
+            _ => value?.ToString() ?? "nil"
+        };
+    }
 }

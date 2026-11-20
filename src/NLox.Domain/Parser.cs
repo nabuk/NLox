@@ -1,6 +1,6 @@
 namespace NLox.Domain;
 
-public class Parser(List<Token> tokens, IErrorReporter errorReporter)
+public class Parser(IReadOnlyList<Token> tokens, IErrorReporter errorReporter)
 {
     private int current = 0;
 
@@ -136,7 +136,7 @@ public class Parser(List<Token> tokens, IErrorReporter errorReporter)
         return new Stmt.Print(value);
     }
     
-    private List<Stmt?> BlockStatement()
+    private IReadOnlyList<Stmt?> BlockStatement()
     {
         var statements = new List<Stmt?>();
         while (!Check(TokenType.RightBrace) && !IsAtEnd())
@@ -224,7 +224,40 @@ public class Parser(List<Token> tokens, IErrorReporter errorReporter)
             return new Expr.Unary(@operator, right);
         }
 
-        return Primary();
+        return Call();
+    }
+
+    private Expr Call()
+    {
+        var expr = Primary();
+
+        while (true)
+        {
+            if (Match(TokenType.LeftParen))
+                expr = FinishCall(expr);
+            else
+                break;
+        }
+        
+        return  expr;
+    }
+
+    private Expr FinishCall(Expr callee)
+    {
+        var arguments = new List<Expr>();
+        if (!Check(TokenType.RightParen))
+            do
+            {
+                if (arguments.Count >= 255)
+                {
+                    Error(Peek(), "Can't have more than 255 arguments.");
+                }
+                arguments.Add(Expression());
+            } while (Match(TokenType.Comma));
+        
+        var paren = Consume(TokenType.RightParen, "Expect ')' after arguments.");
+
+        return new Expr.Call(callee, paren, arguments);
     }
 
     private Expr Primary()

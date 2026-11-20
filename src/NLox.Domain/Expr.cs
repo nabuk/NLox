@@ -13,6 +13,7 @@ public abstract class Expr
         T VisitVariableExpr(Variable expr);
         T VisitAssignExpr(Assign expr);
         T VisitLogicalExpr(Logical expr);
+        T VisitCallExpr(Call expr);
     }
 
     public abstract T Accept<T>(IVisitor<T> visitor);
@@ -84,5 +85,16 @@ public abstract class Expr
         [DebuggerStepThrough]
         public override T Accept<T>(IVisitor<T> visitor) =>
             visitor.VisitLogicalExpr(this);
+    }
+    
+    public class Call(Expr callee, Token paren, IReadOnlyList<Expr> arguments) : Expr
+    {
+        public Expr Callee => callee;
+        public Token Paren => paren;
+        public IReadOnlyList<Expr> Arguments => arguments;
+
+        [DebuggerStepThrough]
+        public override T Accept<T>(IVisitor<T> visitor) =>
+            visitor.VisitCallExpr(this);
     }
 }
