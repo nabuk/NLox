@@ -15,6 +15,8 @@ public class Interpreter : Stmt.IVisitor<object?>, Expr.IVisitor<object?>
         this.environment = globals;
         DefineClock();
     }
+    
+    public EnvironmentScope Globals => globals;
 
     public void Interpret(IEnumerable<Stmt> statements)
     {
@@ -29,9 +31,31 @@ public class Interpreter : Stmt.IVisitor<object?>, Expr.IVisitor<object?>
         }
     }
     
+    public void ExecuteBlock(IEnumerable<Stmt> statements, EnvironmentScope environment)
+    {
+        var previous = this.environment;
+        try
+        {
+            this.environment = environment;
+            foreach (var stmt in statements)
+                Execute(stmt);
+        }
+        finally
+        {
+            this.environment = previous;
+        }
+    }
+    
     object? Stmt.IVisitor<object?>.VisitExpressionStmt(Stmt.Expression stmt)
     {
         Evaluate(stmt.InnerExpression);
+        return null;
+    }
+
+    object? Stmt.IVisitor<object?>.VisitFunctionStmt(Stmt.Function stmt)
+    {
+        var function = new LoxFunction(stmt);
+        environment.Define(stmt.Name.Lexeme, function);
         return null;
     }
 
@@ -185,22 +209,6 @@ public class Interpreter : Stmt.IVisitor<object?>, Expr.IVisitor<object?>
 
     private void Execute(Stmt stmt) =>
         stmt.Accept(this);
-
-    private void ExecuteBlock(IEnumerable<Stmt?> statements, EnvironmentScope environment)
-    {
-        var previous = this.environment;
-        try
-        {
-            this.environment = environment;
-            foreach (var stmt in statements)
-                if (stmt != null)
-                    Execute(stmt);
-        }
-        finally
-        {
-            this.environment = previous;
-        }
-    }
 
     private void CheckNumberOperand(Token @operator, object? operand)
     {

@@ -2,6 +2,7 @@ namespace NLox.Domain;
 
 public class Parser(IReadOnlyList<Token> tokens, IErrorReporter errorReporter)
 {
+    private const int MaxArgCount = 255;
     private int current = 0;
 
     public IReadOnlyList<Stmt> Parse()
@@ -22,6 +23,9 @@ public class Parser(IReadOnlyList<Token> tokens, IErrorReporter errorReporter)
     {
         try
         {
+            if (Match(TokenType.Fun))
+                return Function("function");
+            
             if (Match(TokenType.Var))
                 return VarDeclaration();
 
@@ -136,11 +140,15 @@ public class Parser(IReadOnlyList<Token> tokens, IErrorReporter errorReporter)
         return new Stmt.Print(value);
     }
     
-    private IReadOnlyList<Stmt?> BlockStatement()
+    private IReadOnlyList<Stmt> BlockStatement()
     {
-        var statements = new List<Stmt?>();
+        var statements = new List<Stmt>();
         while (!Check(TokenType.RightBrace) && !IsAtEnd())
-            statements.Add(Declaration());
+        {
+            var stmt = Declaration();
+            if (stmt != null)
+                statements.Add(stmt);
+        }
 
         Consume(TokenType.RightBrace, "Expect '}' after block.");
         return statements;
@@ -151,6 +159,26 @@ public class Parser(IReadOnlyList<Token> tokens, IErrorReporter errorReporter)
         var expr = Expression();
         Consume(TokenType.Semicolon, "Expect ';' after expression.");
         return new Stmt.Expression(expr);
+    }
+
+    private Stmt.Function Function(string kind)
+    {
+        var name = Consume(TokenType.Identifier, $"Expect {kind} name.");
+        Consume(TokenType.LeftParen, $"Expect '(' after {kind} name.");
+        var parameters = new List<Token>();
+        if (!Check(TokenType.RightParen))
+            do
+            {
+                if (parameters.Count >= MaxArgCount)
+                    Error(Peek(), $"Can't have more than {MaxArgCount} parameters");
+                
+                parameters.Add(Consume(TokenType.Identifier, "Expect parameter name"));
+            } while (Match(TokenType.Comma));
+        
+        Consume(TokenType.RightParen, "Expect  ')' after parameters.");
+        Consume(TokenType.LeftBrace, $"Expect  '{{' before {kind} body.");
+        var body = BlockStatement();
+        return new Stmt.Function(name, parameters, body);
     }
 
     private Expr Expression() => Assignment();
@@ -248,9 +276,9 @@ public class Parser(IReadOnlyList<Token> tokens, IErrorReporter errorReporter)
         if (!Check(TokenType.RightParen))
             do
             {
-                if (arguments.Count >= 255)
+                if (arguments.Count >= MaxArgCount)
                 {
-                    Error(Peek(), "Can't have more than 255 arguments.");
+                    Error(Peek(), $"Can't have more than {MaxArgCount} arguments.");
                 }
                 arguments.Add(Expression());
             } while (Match(TokenType.Comma));

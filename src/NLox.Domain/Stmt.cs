@@ -6,6 +6,7 @@ public abstract class Stmt
 {
     public interface IVisitor<out T>
     {
+        T VisitFunctionStmt(Function stmt);
         T VisitExpressionStmt(Expression stmt);
         T VisitIfStmt(If stmt);
         T VisitWhileStmt(While stmt);
@@ -15,6 +16,17 @@ public abstract class Stmt
     }
     
     public abstract T Accept<T>(IVisitor<T> visitor);
+
+    public class Function(Token name, IReadOnlyList<Token> parameters, IReadOnlyList<Stmt> body) : Stmt
+    {
+        public Token Name => name;
+        public IReadOnlyList<Token> Parameters => parameters;
+        public IReadOnlyList<Stmt> Body => body;
+        
+        [DebuggerStepThrough]
+        public override T Accept<T>(IVisitor<T> visitor) =>
+            visitor.VisitFunctionStmt(this);
+    }
 
     public class Expression(Expr expression) : Stmt
     {
@@ -44,9 +56,9 @@ public abstract class Stmt
             visitor.VisitVarStmt(this);
     }
 
-    public class Block(IReadOnlyList<Stmt?> statements) : Stmt
+    public class Block(IReadOnlyList<Stmt> statements) : Stmt
     {
-        public IReadOnlyList<Stmt?> Statements => statements;
+        public IReadOnlyList<Stmt> Statements => statements;
         
         [DebuggerStepThrough]
         public override T Accept<T>(IVisitor<T> visitor) =>
