@@ -54,7 +54,7 @@ public class Interpreter : Stmt.IVisitor<object?>, Expr.IVisitor<object?>
 
     object? Stmt.IVisitor<object?>.VisitFunctionStmt(Stmt.Function stmt)
     {
-        var function = new LoxFunction(stmt);
+        var function = new LoxFunction(stmt, environment);
         environment.Define(stmt.Name.Lexeme, function);
         return null;
     }

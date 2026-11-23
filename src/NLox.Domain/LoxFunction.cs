@@ -1,12 +1,12 @@
 namespace NLox.Domain;
 
-public sealed class LoxFunction(Stmt.Function declaration) : ILoxCallable
+public sealed class LoxFunction(Stmt.Function declaration, EnvironmentScope closure) : ILoxCallable
 {
     public int Arity => declaration.Parameters.Count;
     
     public object? Call(Interpreter interpreter, IReadOnlyList<object?> arguments)
     {
-        var environment = new EnvironmentScope(interpreter.Globals);
+        var environment = new EnvironmentScope(closure);
 
         foreach (var pair in declaration.Parameters.Zip(arguments))
             environment.Define(pair.First.Lexeme, pair.Second);
