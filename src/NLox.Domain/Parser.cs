@@ -70,6 +70,9 @@ public class Parser(IReadOnlyList<Token> tokens, IErrorReporter errorReporter)
         if (Match(TokenType.Print))
             return PrintStatement();
         
+        if (Match(TokenType.Return))
+            return ReturnStatement();
+        
         if (Match(TokenType.While))
             return WhileStatement();
 
@@ -138,6 +141,17 @@ public class Parser(IReadOnlyList<Token> tokens, IErrorReporter errorReporter)
         var value = Expression();
         Consume(TokenType.Semicolon, "Expect ';' after value.");
         return new Stmt.Print(value);
+    }
+    
+    private Stmt ReturnStatement()
+    {
+        var keyword = Previous();
+        Expr? value = null;
+        if (!Check(TokenType.Semicolon))
+            value = Expression();
+
+        Consume(TokenType.Semicolon, "Expect ';' after return value.");
+        return new Stmt.Return(keyword, value);
     }
     
     private IReadOnlyList<Stmt> BlockStatement()

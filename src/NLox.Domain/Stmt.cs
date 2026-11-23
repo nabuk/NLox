@@ -7,6 +7,7 @@ public abstract class Stmt
     public interface IVisitor<out T>
     {
         T VisitFunctionStmt(Function stmt);
+        T VisitReturnStmt(Return stmt);
         T VisitExpressionStmt(Expression stmt);
         T VisitIfStmt(If stmt);
         T VisitWhileStmt(While stmt);
@@ -26,6 +27,16 @@ public abstract class Stmt
         [DebuggerStepThrough]
         public override T Accept<T>(IVisitor<T> visitor) =>
             visitor.VisitFunctionStmt(this);
+    }
+
+    public class Return(Token keyword, Expr? value) : Stmt
+    {
+        public Token Keyword => keyword;
+        public Expr? Value => value;
+        
+        [DebuggerStepThrough]
+        public override T Accept<T>(IVisitor<T> visitor) =>
+            visitor.VisitReturnStmt(this);
     }
 
     public class Expression(Expr expression) : Stmt

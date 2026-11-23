@@ -59,6 +59,15 @@ public class Interpreter : Stmt.IVisitor<object?>, Expr.IVisitor<object?>
         return null;
     }
 
+    object? Stmt.IVisitor<object?>.VisitReturnStmt(Stmt.Return stmt)
+    {
+        object? value = null;
+        if (stmt.Value != null)
+            value = Evaluate(stmt.Value);
+
+        throw new Return(value);
+    }
+
     object? Stmt.IVisitor<object?>.VisitIfStmt(Stmt.If stmt)
     {
         if (IsTruthy(Evaluate(stmt.Condition)))

@@ -10,8 +10,16 @@ public sealed class LoxFunction(Stmt.Function declaration) : ILoxCallable
 
         foreach (var pair in declaration.Parameters.Zip(arguments))
             environment.Define(pair.First.Lexeme, pair.Second);
+
+        try
+        {
+            interpreter.ExecuteBlock(declaration.Body, environment);
+        }
+        catch (Return e)
+        {
+            return e.Value;
+        }
         
-        interpreter.ExecuteBlock(declaration.Body, environment);
         return null;
     }
 
