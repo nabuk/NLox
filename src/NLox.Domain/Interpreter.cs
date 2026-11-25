@@ -5,6 +5,7 @@ public class Interpreter : Stmt.IVisitor<object?>, Expr.IVisitor<object?>
     private readonly IConsole console;
     private readonly IErrorReporter errorReporter;
     private readonly EnvironmentScope globals;
+    private readonly Dictionary<Expr, int> locals = new();
     private EnvironmentScope environment;
 
     public Interpreter(IConsole console, IErrorReporter errorReporter)
@@ -45,6 +46,9 @@ public class Interpreter : Stmt.IVisitor<object?>, Expr.IVisitor<object?>
             this.environment = previous;
         }
     }
+
+    public void Resolve(Expr expr, int depth) =>
+        locals[expr] = depth;
     
     object? Stmt.IVisitor<object?>.VisitExpressionStmt(Stmt.Expression stmt)
     {
@@ -207,17 +211,30 @@ public class Interpreter : Stmt.IVisitor<object?>, Expr.IVisitor<object?>
     }
 
     object? Expr.IVisitor<object?>.VisitVariableExpr(Expr.Variable expr) =>
-        environment.Get(expr.Name);
+        LookupVariable(expr.Name, expr);
 
     object? Expr.IVisitor<object?>.VisitAssignExpr(Expr.Assign expr)
     {
         var value = Evaluate(expr.Value);
-        environment.Assign(expr.Name, value);
+        
+        if (locals.TryGetValue(expr, out var distance))
+            environment.AssignAt(distance, expr.Name, value);
+        else
+            globals.Assign(expr.Name, value);
+        
         return value;
     }
 
     private void Execute(Stmt stmt) =>
         stmt.Accept(this);
+
+    private object? LookupVariable(Token name, Expr expr)
+    {
+        if (locals.TryGetValue(expr, out var distance))
+            return environment.GetAt(distance, name.Lexeme);
+        else
+            return globals.Get(name);
+    }
 
     private void CheckNumberOperand(Token @operator, object? operand)
     {

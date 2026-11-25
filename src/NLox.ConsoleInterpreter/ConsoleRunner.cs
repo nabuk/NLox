@@ -39,11 +39,16 @@ public sealed class ConsoleRunner(IConsole console, IErrorReporter errorReporter
         var scanner = new Scanner(source, errorReporter);
         var tokens = scanner.ScanTokens();
         var parser = new Parser(tokens, errorReporter);
+        var resolver = new Resolver(interpreter, errorReporter);
         
         if (errorReporter.HadError)
             return;
         
         var statements = parser.Parse();
+        if (errorReporter.HadError)
+            return;
+        
+        resolver.Resolve(statements);
         if (errorReporter.HadError)
             return;
         
