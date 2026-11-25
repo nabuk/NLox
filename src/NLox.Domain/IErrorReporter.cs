@@ -13,5 +13,6 @@ public interface IErrorReporter
     void Error(Token token, string message);
     
     void RuntimeError(RuntimeError error);
+    
     void ResetHadRuntimeError();
 }

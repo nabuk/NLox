@@ -2,7 +2,7 @@ namespace NLox.Domain;
 
 public class Resolver(Interpreter interpreter, IErrorReporter errorReporter) : Expr.IVisitor<object?>, Stmt.IVisitor<object?>
 {
-    private readonly Stack<Dictionary<string, bool>> scopes = new();
+    private readonly Stack<Dictionary<string, VarMeta>> scopes = new();
     private FunctionType currentFunction = FunctionType.None;
     
     public void Resolve(IEnumerable<Stmt> stmts)
@@ -30,7 +30,7 @@ public class Resolver(Interpreter interpreter, IErrorReporter errorReporter) : E
 
     object? Expr.IVisitor<object?>.VisitVariableExpr(Expr.Variable expr)
     {
-        if (scopes.Count > 0 && scopes.Peek().TryGetValue(expr.Name.Lexeme, out var variable) && !variable)
+        if (scopes.Count > 0 && scopes.Peek().TryGetValue(expr.Name.Lexeme, out var varMeta) && !varMeta.Defined)
             errorReporter.Error(expr.Name, "Can't read local variable in its own initializer.");
 
         ResolveLocal(expr, expr.Name);
@@ -156,9 +156,10 @@ public class Resolver(Interpreter interpreter, IErrorReporter errorReporter) : E
         var depth = 0;
         foreach (var scope in scopes)
         {
-            if (scope.ContainsKey(name.Lexeme))
+            if (scope.TryGetValue(name.Lexeme, out var value))
             {
                 interpreter.Resolve(expr, depth);
+                value.Used = true;
                 return;
             }
             depth++;
@@ -174,7 +175,7 @@ public class Resolver(Interpreter interpreter, IErrorReporter errorReporter) : E
         if (scope.ContainsKey(name.Lexeme))
             errorReporter.Error(name, "Already a variable with this name in this scope.");
         
-        scope[name.Lexeme] = false;
+        scope[name.Lexeme] = new VarMeta(name);
     }
 
     private void Define(Token name)
@@ -182,12 +183,23 @@ public class Resolver(Interpreter interpreter, IErrorReporter errorReporter) : E
         if (scopes.Count == 0)
             return;
 
-        scopes.Peek()[name.Lexeme] = true;
+        scopes.Peek()[name.Lexeme].Defined = true;
     }
     
     private void BeginScope() =>
-        scopes.Push(new Dictionary<string, bool>());
+        scopes.Push(new ());
 
-    private void EndScope() =>
-        scopes.Pop();
+    private void EndScope()
+    {
+        var scope = scopes.Pop();
+        foreach (var meta in scope.Values.Where(x => !x.Used))
+            errorReporter.Error(meta.Token, "Variable not used.");
+    }
+
+    class VarMeta(Token token)
+    {
+        public Token Token => token;
+        public bool Defined { get; set; }
+        public bool Used { get; set; }
+    }
 }
